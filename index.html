@@ -40,7 +40,7 @@
           Katalog Stok Real-Time
         </span>
         <h2 id="role-title" class="text-2xl font-extrabold mb-1">Ketersediaan Hasil Tangkapan TPI</h2>
-        <p id="role-desc" class="text-blue-100 text-xs">Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu hubungi pedagang pemilik barang.</p>
+        <p id="role-desc" class="text-blue-100 text-xs">Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu lakukan klaim atau hubungi pengelola TPI.</p>
       </div>
     </header>
 
@@ -62,7 +62,7 @@
 
           <!-- Input Cari Spesifik -->
           <div class="w-full md:w-72">
-            <input type="text" id="search-input" onkeyup="filterPasokan()" placeholder="Ketik nama komoditas/kapal/pedagang..." class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500" />
+            <input type="text" id="search-input" onkeyup="filterPasokan()" placeholder="Ketik nama komoditas/kapal..." class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500" />
           </div>
         </div>
 
@@ -72,19 +72,15 @@
         </div>
       </section>
 
-      <!-- MODE 2: FORM INPUT PETUGAS TPI -->
+      <!-- MODE 2: FORM INPUT PETUGAS TPI (RINGKAS TANPA HP) -->
       <section id="sec-petugas" class="hidden max-w-xl mx-auto bg-white p-6 rounded-3xl border border-slate-200 shadow-md">
         <h3 class="text-lg font-bold text-blue-950 mb-1">Input Timbangan Resmi TPI</h3>
         <p class="text-xs text-slate-500 mb-4">Catat laporan fisik penimbangan kapal yang baru mendarat di dermaga TPI Manggar Baru.</p>
         
         <form onsubmit="simpanDataTPI(event)" class="space-y-3">
           <div>
-            <label class="text-xs font-bold text-slate-700 block mb-1">Nama Kapal / Pedagang Pemilik Barang</label>
+            <label class="text-xs font-bold text-slate-700 block mb-1">Nama Kapal / Nelayan Pelapor</label>
             <input type="text" id="tpi-kapal" placeholder="Misal: KM Laut Sahabat (Pak Aris)" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-700 block mb-1">No. WhatsApp Pedagang Pemilik (Contoh: 08123456789)</label>
-            <input type="text" id="tpi-hp" placeholder="081234567890" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div>
             <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Komoditas Perikanan</label>
@@ -153,6 +149,9 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const TABLE_NAME = 'tpi-manggar';
 
+    // NOMOR OFFICIAL WA TPI MANGGAR BARU (Dapat diubah sesuai nomor pengelola)
+    const NOMOR_OFFICIAL_TPI = "6281234567890";
+
     let pasokanTPI = [];
     let activeKategori = 'semua';
 
@@ -168,7 +167,7 @@
         document.getElementById('tab-publik').className = "px-4 py-2 rounded-xl bg-orange-500 text-white transition";
         document.getElementById('role-badge').innerText = "Katalog Stok Real-Time";
         document.getElementById('role-title').innerText = "Ketersediaan Hasil Tangkapan TPI";
-        document.getElementById('role-desc').innerText = "Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu hubungi pedagang pemilik barang.";
+        document.getElementById('role-desc').innerText = "Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu lakukan klaim atau hubungi pengelola TPI.";
       } else if(role === 'petugas') {
         document.getElementById('sec-petugas').classList.remove('hidden');
         document.getElementById('tab-petugas').className = "px-4 py-2 rounded-xl bg-orange-500 text-white transition";
@@ -188,13 +187,6 @@
       filterPasokan();
     }
 
-    function formatWA(no) {
-      if(!no) return '6281234567890';
-      let clean = no.replace(/[^0-9]/g, '');
-      if (clean.startsWith('0')) clean = '62' + clean.slice(1);
-      return clean;
-    }
-
     function renderPasokan(data) {
       const container = document.getElementById('pasokan-grid');
       container.innerHTML = '';
@@ -208,14 +200,13 @@
         
         const sisaStok = item.jumlah_kg || 0;
         const isHabis = sisaStok <= 0;
-        const waNumber = formatWA(item.no_hp);
-        const waText = encodeURIComponent(`Halo ${item.kapal || 'Pedagang'}, saya lihat di Portal TPI stok ${item.komoditas || item.ikan} sisa ${sisaStok} Kg dengan harga Rp ${Number(item.harga_patokan||0).toLocaleString('id-ID')}/Kg. Saya mau tanya/beli.`);
+        const waText = encodeURIComponent(`Halo Pengelola TPI Manggar, saya ingin konfirmasi stok ${item.komoditas || item.ikan} dari ${item.kapal} (sisa ${sisaStok} Kg) dengan patokan harga Rp ${Number(item.harga_patokan||0).toLocaleString('id-ID')}/Kg.`);
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
-                Pemilik/Kapal: ${item.kapal || '-'}
+                Kapal: ${item.kapal || '-'}
               </span>
               <span class="text-[10px] font-bold ${isHabis ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'} px-2.5 py-1 rounded-full">
                 ${isHabis ? 'HABIS / SOLD OUT' : 'Verified TPI'}
@@ -237,7 +228,7 @@
           </div>
 
           <div class="space-y-2">
-            <!-- Tombol 1: Ambil/Potong Stok Langsung di Web -->
+            <!-- Tombol 1: Potong Stok Langsung di Web -->
             <button 
               onclick="openModalAmbil(${item.id}, '${item.komoditas || item.ikan}', ${sisaStok})" 
               ${isHabis ? 'disabled' : ''} 
@@ -245,12 +236,12 @@
               ${isHabis ? 'Stok Telah Habis' : '🛍️ Ambil / Beli Stok Ini'}
             </button>
 
-            <!-- Tombol 2: Kontak WA Pedagang Pemilik -->
+            <!-- Tombol 2: Kontak WA Pengelola TPI -->
             <a 
-              href="https://wa.me/${waNumber}?text=${waText}" 
+              href="https://wa.me/${NOMOR_OFFICIAL_TPI}?text=${waText}" 
               target="_blank" 
               class="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-xl transition block shadow-sm">
-              💬 Chat Pedagang (${item.no_hp || 'WA'})
+              💬 Koordinasi via WA TPI
             </a>
           </div>
         `;
@@ -258,7 +249,6 @@
       });
     }
 
-    // FILTER PENCARIAN & KATEGORI
     function filterKategori(kat) {
       activeKategori = kat;
       document.querySelectorAll('.btn-kategori').forEach(btn => {
@@ -287,7 +277,6 @@
       renderPasokan(filtered);
     }
 
-    // MODAL DAN PROSES PENGURANGAN STOK
     function openModalAmbil(id, komoditas, currentKg) {
       document.getElementById('modal-item-id').value = id;
       document.getElementById('modal-current-kg').value = currentKg;
@@ -340,17 +329,16 @@
       document.getElementById('btn-submit-ambil').disabled = false;
     }
 
-    // INPUT DATA TPI
     async function simpanDataTPI(e) {
       e.preventDefault();
       document.getElementById('btn-tpi').innerText = "Menyimpan...";
       const kapal = document.getElementById('tpi-kapal').value;
-      const no_hp = document.getElementById('tpi-hp').value;
       const komoditas = document.getElementById('tpi-komoditas').value;
       const jumlah_kg = parseInt(document.getElementById('tpi-kg').value);
       const harga_patokan = parseInt(document.getElementById('tpi-harga').value);
 
-      const { error } = await _supabase.from(TABLE_NAME).insert([{ kapal, no_hp, komoditas, jumlah_kg, harga_patokan }]);
+      // Simpan langsung tanpa memerlukan no_hp
+      const { error } = await _supabase.from(TABLE_NAME).insert([{ kapal, komoditas, jumlah_kg, harga_patokan }]);
       if (error) {
         alert("Gagal menyimpan data: " + error.message);
       } else {
