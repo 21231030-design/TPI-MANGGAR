@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TPI Manggar Baru - Papan Informasi Pasokan Ikan</title>
+  <title>TPI Manggar Baru - Papan Informasi Pasokan</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
@@ -22,7 +24,7 @@
           </div>
         </div>
         
-        <div class="flex items-center gap-3">
+        <div>
           <!-- Tombol Akses Khusus Petugas Admin TPI -->
           <button 
             onclick="openPetugasModal()" 
@@ -34,30 +36,28 @@
       </div>
     </nav>
 
-    <!-- BANNER RINGKASAN STOK HARIAN -->
+    <!-- BANNER INFORMASI -->
     <header class="max-w-7xl mx-auto px-6 pt-6 pb-2">
       <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
-        <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/20 rounded-full blur-2xl"></div>
-        
         <div class="relative z-10 max-w-3xl">
           <span class="inline-block bg-orange-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-md mb-3 tracking-wider">
             Informasi Resmi TPI Manggar Baru
           </span>
           <h2 class="text-2xl md:text-3xl font-extrabold mb-2 leading-tight">
-            Katalog Stok Pasokan Ikan Hari Ini
+            Katalog Stok Pasokan Hasil Laut Hari Ini
           </h2>
           <p class="text-blue-100 text-xs md:text-sm leading-relaxed">
-            Daftar ketersediaan volume stok perikatan yang telah diverifikasi dan dicatat oleh petugas dermaga TPI Manggar Baru. Customer skala besar (Resto/Hotel) dapat memantau ketersediaan pasokan secara real-time.
+            Daftar ketersediaan volume stok perikanan yang telah diverifikasi dan dicatat oleh petugas dermaga TPI Manggar Baru secara real-time.
           </p>
         </div>
       </div>
     </header>
 
-    <!-- KATALOG STOK UTAMA (DILIHAT CUSTOMER/PUBLIK) -->
+    <!-- KATALOG STOK UTAMA -->
     <main class="max-w-7xl mx-auto px-6 my-8">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <div>
-          <h3 class="text-lg font-bold text-blue-950">Daftar Stok Ikan Siap Angkut</h3>
+          <h3 class="text-lg font-bold text-blue-950">Daftar Stok Siap Angkut</h3>
           <p class="text-xs text-slate-500">Sesuai laporan penimbangan fisik di dermaga TPI.</p>
         </div>
         <div class="w-full md:w-auto">
@@ -65,18 +65,20 @@
             type="text" 
             id="search-input" 
             onkeyup="filterPasokan()" 
-            placeholder="Cari jenis ikan / nama kapal..." 
+            placeholder="Cari jenis komoditas / nama kapal..." 
             class="p-3 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500 w-full md:w-64"
           />
         </div>
       </div>
 
       <!-- GRID KARTU STOK -->
-      <div id="pasokan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="pasokan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <p class="col-span-full text-center py-10 text-slate-400 text-sm">Memuat data dari Supabase...</p>
+      </div>
     </main>
   </div>
 
-  <!-- MODAL INPUT DOCKING / TIMBANGAN (SIMULASI PETUGAS TPI) -->
+  <!-- MODAL FORM INPUT PETUGAS TPI -->
   <div id="petugas-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-100">
       <div class="flex justify-between items-center mb-4">
@@ -92,8 +94,8 @@
           <input type="text" id="nama-kapal" placeholder="Misal: KM Laut Sahabat (Pak Aris)" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
         <div>
-          <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Ikan Tangkapan</label>
-          <input type="text" id="jenis-ikan" placeholder="Misal: Kakap Merah / Tongkol" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Komoditas (Ikan/Udang/Cumi)</label>
+          <input type="text" id="jenis-komoditas" placeholder="Misal: Udang Windu / Kakap Merah" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -108,7 +110,7 @@
 
         <div class="flex gap-3 pt-3">
           <button type="button" onclick="closePetugasModal()" class="flex-1 py-2.5 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl">Batal</button>
-          <button type="submit" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md">Terbitkan Stok</button>
+          <button type="submit" id="btn-submit" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md">Terbitkan Stok</button>
         </div>
       </form>
     </div>
@@ -120,20 +122,36 @@
   </footer>
 
   <script>
-    // Data Dummy Awal Pasokan Hasil Timbang Dermaga TPI
-    let pasokanTPI = [
-      { id: 1, kapal: "KM Sinar Laut (Pak Mansyur)", ikan: "Kakap Merah", jumlahKg: 120, hargaPatokan: 35000, jamCatat: "05:30 WITA", kontakTPI: "6281234567890" },
-      { id: 2, kapal: "KM Bahari Manggar (Pak Burhan)", ikan: "Tongkol Komando", jumlahKg: 250, hargaPatokan: 22000, jamCatat: "06:15 WITA", kontakTPI: "6281234567890" },
-      { id: 3, kapal: "KM Nelayan Perkasa (Pak Herman)", ikan: "Cumi-Cumi Jarum", jumlahKg: 75, hargaPatokan: 48000, jamCatat: "06:45 WITA", kontakTPI: "6281234567890" },
-      { id: 4, kapal: "KM Laut Sahabat (Pak Aris)", ikan: "Ikan Layang", jumlahKg: 300, hargaPatokan: 18000, jamCatat: "07:10 WITA", kontakTPI: "6281234567890" }
-    ];
+    // Konfigurasi Supabase Kamu
+    const SUPABASE_URL = "https://maspqcdmwnaquptndxfs.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hc3BxY2Rtd25hcXVwdG5keGZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NjU2MzgsImV4cCI6MjEwODI0MTYzOH0.nxlYKmcJCk6KpPhaBBlkvGbCAxdw_XjJBegSjNKeQxU";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let pasokanTPI = [];
+
+    // Ambil Data dari Supabase
+    async function loadPasokan() {
+      const { data, error } = await _supabase
+        .from('pasokan_tpi')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) {
+        console.error("Gagal mengambil data:", error);
+        document.getElementById('pasokan-grid').innerHTML = `<p class="col-span-full text-center py-10 text-red-500 text-sm">Gagal memuat data dari database.</p>`;
+        return;
+      }
+
+      pasokanTPI = data || [];
+      renderPasokan(pasokanTPI);
+    }
 
     function renderPasokan(data) {
       const container = document.getElementById('pasokan-grid');
       container.innerHTML = '';
 
       if (data.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Tidak ada stok pasokan yang sesuai pencarian.</p>`;
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Belum ada data stok pasokan.</p>`;
         return;
       }
 
@@ -141,18 +159,20 @@
         const card = document.createElement('div');
         card.className = "bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between";
 
+        const tanggal = item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : 'Hari ini';
+
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
-                Mendarat: ${item.jamCatat}
+                Dicatat: ${tanggal}
               </span>
               <span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
                 TPI Verified
               </span>
             </div>
 
-            <h4 class="text-xl font-extrabold text-blue-950 mb-1">${item.ikan}</h4>
+            <h4 class="text-xl font-extrabold text-blue-950 mb-1">${item.komoditas || 'Komoditas Laut'}</h4>
             <p class="text-xs font-semibold text-slate-500 mb-4">
               Asal Kapal: <span class="text-slate-800">${item.kapal}</span>
             </p>
@@ -160,16 +180,16 @@
             <div class="bg-slate-50 p-4 rounded-2xl mb-5 border border-slate-100 grid grid-cols-2 gap-2">
               <div>
                 <span class="text-[10px] text-slate-400 font-bold block uppercase">Ketersediaan Stok</span>
-                <span class="text-lg font-black text-blue-900">${item.jumlahKg} Kg</span>
+                <span class="text-lg font-black text-blue-900">${item.jumlah_kg} Kg</span>
               </div>
               <div class="text-right">
                 <span class="text-[10px] text-slate-400 font-bold block uppercase">Kisaran Harga</span>
-                <span class="text-lg font-black text-orange-600">Rp ${item.hargaPatokan.toLocaleString('id-ID')}/Kg</span>
+                <span class="text-lg font-black text-orange-600">Rp ${Number(item.harga_patokan).toLocaleString('id-ID')}/Kg</span>
               </div>
             </div>
           </div>
 
-          <a href="https://wa.me/${item.kontakTPI}?text=Halo%20Petugas%20TPI,%20saya%20tertarik%20dengan%20stok%20${encodeURIComponent(item.ikan)}%20(${item.jumlahKg}%20Kg)%20dari%20${encodeURIComponent(item.kapal)}" 
+          <a href="https://wa.me/6281234567890?text=Halo%20Petugas%20TPI,%20saya%20tertarik%20dengan%20stok%20${encodeURIComponent(item.komoditas)}%20(${item.jumlah_kg}%20Kg)%20dari%20${encodeURIComponent(item.kapal)}" 
              target="_blank" 
              class="w-full text-center bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl transition shadow-sm block">
             Tanyakan Stok / Koordinasi Beli
@@ -182,7 +202,8 @@
     function filterPasokan() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const filtered = pasokanTPI.filter(item => 
-        item.ikan.toLowerCase().includes(search) || item.kapal.toLowerCase().includes(search)
+        (item.komoditas && item.komoditas.toLowerCase().includes(search)) || 
+        (item.kapal && item.kapal.toLowerCase().includes(search))
       );
       renderPasokan(filtered);
     }
@@ -190,32 +211,37 @@
     function openPetugasModal() { document.getElementById('petugas-modal').classList.remove('hidden'); }
     function closePetugasModal() { document.getElementById('petugas-modal').classList.add('hidden'); }
 
-    function simpanLaporanPetugas(e) {
+    // Simpan Data Baru ke Supabase
+    async function simpanLaporanPetugas(e) {
       e.preventDefault();
+      const btnSubmit = document.getElementById('btn-submit');
+      btnSubmit.innerText = "Menyimpan...";
+      btnSubmit.disabled = true;
+
       const kapal = document.getElementById('nama-kapal').value;
-      const ikan = document.getElementById('jenis-ikan').value;
-      const kg = parseInt(document.getElementById('jumlah-kg').value);
-      const harga = parseInt(document.getElementById('harga-patokan').value);
+      const komoditas = document.getElementById('jenis-komoditas').value;
+      const jumlah_kg = parseInt(document.getElementById('jumlah-kg').value);
+      const harga_patokan = parseInt(document.getElementById('harga-patokan').value);
 
-      const jamSekarang = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WITA";
+      const { data, error } = await _supabase
+        .from('pasokan_tpi')
+        .insert([{ kapal, komoditas, jumlah_kg, harga_patokan }]);
 
-      pasokanTPI.unshift({
-        id: Date.now(),
-        kapal: kapal,
-        ikan: ikan,
-        jumlahKg: kg,
-        hargaPatokan: harga,
-        jamCatat: jamSekarang,
-        kontakTPI: "6281234567890"
-      });
+      if (error) {
+        alert("Gagal menyimpan data: " + error.message);
+      } else {
+        alert("Stok baru berhasil diterbitkan!");
+        document.querySelector('form').reset();
+        closePetugasModal();
+        loadPasokan(); // Refresh data
+      }
 
-      closePetugasModal();
-      filterPasokan();
-      alert(`Stok baru berhasil diterbitkan oleh Petugas TPI!`);
+      btnSubmit.innerText = "Terbitkan Stok";
+      btnSubmit.disabled = false;
     }
 
-    // Inisialisasi awal
-    renderPasokan(pasokanTPI);
+    // Jalankan pertama kali saat halaman dimuat
+    loadPasokan();
   </script>
 </body>
 </html>
