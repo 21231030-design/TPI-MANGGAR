@@ -3,244 +3,365 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TPI Manggar Baru - Papan Informasi Pasokan</title>
+  <title>Portal Logistik TPI Manggar Baru</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Library Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
   <div>
     <!-- NAVBAR UTAMA -->
     <nav class="bg-blue-900 border-b-4 border-orange-500 text-white px-6 py-4 sticky top-0 z-40 shadow-md">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-          <div class="bg-orange-500 text-white font-black p-2 rounded-xl text-lg shadow-sm">
-            TPI
-          </div>
+          <div class="bg-orange-500 text-white font-black p-2 rounded-xl text-lg shadow-sm">TPI</div>
           <div>
-            <h1 class="text-lg font-bold tracking-wide">Papan Informasi TPI Manggar Baru</h1>
-            <p class="text-[11px] text-blue-200">Ketersediaan Stok & Hasil Tangkapan Nelayan</p>
+            <h1 class="text-lg font-bold tracking-wide">Portal Logistik TPI Manggar Baru</h1>
+            <p class="text-[11px] text-blue-200">Katalog Stok Real-Time & Informasi Lelang Perikanan</p>
           </div>
         </div>
         
-        <div>
-          <!-- Tombol Akses Khusus Petugas Admin TPI -->
-          <button 
-            onclick="openPetugasModal()" 
-            class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition"
-          >
-            + Input Hasil Timbang (Petugas TPI)
+        <!-- SWITCH MODES -->
+        <div class="flex bg-blue-950 p-1 rounded-2xl border border-blue-800 text-xs font-bold">
+          <button onclick="switchRole('publik')" id="tab-publik" class="px-4 py-2 rounded-xl bg-orange-500 text-white transition">
+            🛒 Katalog Customer & Pedagang
+          </button>
+          <button onclick="switchRole('petugas')" id="tab-petugas" class="px-4 py-2 rounded-xl text-blue-200 hover:text-white transition">
+            📋 Input Petugas TPI
           </button>
         </div>
       </div>
     </nav>
 
-    <!-- BANNER INFORMASI -->
+    <!-- BANNER -->
     <header class="max-w-7xl mx-auto px-6 pt-6 pb-2">
-      <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
-        <div class="relative z-10 max-w-3xl">
-          <span class="inline-block bg-orange-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-md mb-3 tracking-wider">
-            Informasi Resmi TPI Manggar Baru
-          </span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 leading-tight">
-            Katalog Stok Pasokan Hasil Laut Hari Ini
-          </h2>
-          <p class="text-blue-100 text-xs md:text-sm leading-relaxed">
-            Daftar ketersediaan volume stok perikanan yang telah diverifikasi dan dicatat oleh petugas dermaga TPI Manggar Baru secara real-time.
-          </p>
-        </div>
+      <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 text-white shadow-xl">
+        <span id="role-badge" class="inline-block bg-orange-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-md mb-2">
+          Katalog Stok Real-Time
+        </span>
+        <h2 id="role-title" class="text-2xl font-extrabold mb-1">Ketersediaan Hasil Tangkapan TPI</h2>
+        <p id="role-desc" class="text-blue-100 text-xs">Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu hubungi pedagang pemilik barang.</p>
       </div>
     </header>
 
-    <!-- KATALOG STOK UTAMA -->
-    <main class="max-w-7xl mx-auto px-6 my-8">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <div>
-          <h3 class="text-lg font-bold text-blue-950">Daftar Stok Siap Angkut</h3>
-          <p class="text-xs text-slate-500">Sesuai laporan penimbangan fisik di dermaga TPI.</p>
-        </div>
-        <div class="w-full md:w-auto">
-          <input 
-            type="text" 
-            id="search-input" 
-            onkeyup="filterPasokan()" 
-            placeholder="Cari jenis komoditas / nama kapal..." 
-            class="p-3 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500 w-full md:w-64"
-          />
-        </div>
-      </div>
+    <main class="max-w-7xl mx-auto px-6 my-6">
 
-      <!-- GRID KARTU STOK -->
-      <div id="pasokan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <p class="col-span-full text-center py-10 text-slate-400 text-sm">Memuat data dari Supabase...</p>
-      </div>
+      <!-- MODE 1: KATALOG UTAMA (CUSTOMER / PEDAGANG) -->
+      <section id="sec-publik" class="space-y-5">
+        
+        <!-- BARIS FILTER & PENCARIAN -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+          <!-- Filter Kategori Tombol Cepat -->
+          <div class="flex flex-wrap gap-2 text-xs font-bold w-full md:w-auto">
+            <button onclick="filterKategori('semua')" class="btn-kategori bg-orange-500 text-white px-3.5 py-2 rounded-xl transition" data-cat="semua">Semua</button>
+            <button onclick="filterKategori('ikan')" class="btn-kategori bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition" data-cat="ikan">🐟 Ikan</button>
+            <button onclick="filterKategori('udang')" class="btn-kategori bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition" data-cat="udang">🦐 Udang</button>
+            <button onclick="filterKategori('cumi')" class="btn-kategori bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition" data-cat="cumi">🦑 Cumi</button>
+            <button onclick="filterKategori('kepiting')" class="btn-kategori bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition" data-cat="kepiting">🦀 Kepiting</button>
+          </div>
+
+          <!-- Input Cari Spesifik -->
+          <div class="w-full md:w-72">
+            <input type="text" id="search-input" onkeyup="filterPasokan()" placeholder="Ketik nama komoditas/kapal/pedagang..." class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500" />
+          </div>
+        </div>
+
+        <!-- GRID KATALOG BARANG -->
+        <div id="pasokan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <p class="col-span-full text-center py-10 text-slate-400 text-sm">Memuat data stok terbaru...</p>
+        </div>
+      </section>
+
+      <!-- MODE 2: FORM INPUT PETUGAS TPI -->
+      <section id="sec-petugas" class="hidden max-w-xl mx-auto bg-white p-6 rounded-3xl border border-slate-200 shadow-md">
+        <h3 class="text-lg font-bold text-blue-950 mb-1">Input Timbangan Resmi TPI</h3>
+        <p class="text-xs text-slate-500 mb-4">Catat laporan fisik penimbangan kapal yang baru mendarat di dermaga TPI Manggar Baru.</p>
+        
+        <form onsubmit="simpanDataTPI(event)" class="space-y-3">
+          <div>
+            <label class="text-xs font-bold text-slate-700 block mb-1">Nama Kapal / Pedagang Pemilik Barang</label>
+            <input type="text" id="tpi-kapal" placeholder="Misal: KM Laut Sahabat (Pak Aris)" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-700 block mb-1">No. WhatsApp Pedagang Pemilik (Contoh: 08123456789)</label>
+            <input type="text" id="tpi-hp" placeholder="081234567890" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Komoditas Perikanan</label>
+            <input type="text" id="tpi-komoditas" placeholder="Misal: Ikan Layang / Udang Windu / Cumi" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-bold text-slate-700 block mb-1">Total Timbangan Awal (Kg)</label>
+              <input type="number" id="tpi-kg" placeholder="50" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-700 block mb-1">Harga Patokan (Rp/Kg)</label>
+              <input type="number" id="tpi-harga" placeholder="25000" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+            </div>
+          </div>
+          <button type="submit" id="btn-tpi" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition mt-2">
+            Terbitkan Stok Ke Katalog
+          </button>
+        </form>
+      </section>
+
     </main>
   </div>
 
-  <!-- MODAL FORM INPUT PETUGAS TPI -->
-  <div id="petugas-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-100">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-blue-950">Form Timbangan Petugas TPI</h3>
-        <button onclick="closePetugasModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+  <!-- MODAL AMBIL / BELI STOK -->
+  <div id="modal-ambil" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-bold text-blue-950">Form Ambil / Kurangi Stok</h3>
+        <button onclick="closeModalAmbil()" class="text-slate-400 font-bold text-lg">&times;</button>
       </div>
-      
-      <p class="text-xs text-slate-500 mb-4">Input data hasil laporan penimbangan manual dari kapal nelayan yang mendarat.</p>
 
-      <form onsubmit="simpanLaporanPetugas(event)" class="space-y-3">
+      <div class="bg-blue-50 p-3 rounded-2xl mb-4 text-xs text-blue-900 border border-blue-100">
+        <p class="font-bold" id="modal-komoditas-title">Komoditas</p>
+        <p>Sisa Stok Tersedia: <span id="modal-sisa-kg" class="font-extrabold text-orange-600">0</span> Kg</p>
+      </div>
+
+      <form onsubmit="prosesAmbilStok(event)" class="space-y-3">
+        <input type="hidden" id="modal-item-id" />
+        <input type="hidden" id="modal-current-kg" />
+        
         <div>
-          <label class="text-xs font-bold text-slate-700 block mb-1">Nama Kapal / Nelayan Pelapor</label>
-          <input type="text" id="nama-kapal" placeholder="Misal: KM Laut Sahabat (Pak Aris)" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          <label class="text-xs font-bold text-slate-700 block mb-1">Nama Pembeli / Pedagang</label>
+          <input type="text" id="pedagang-nama" placeholder="Misal: Resto Nelayan / Pak Joko" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500" />
         </div>
         <div>
-          <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Komoditas (Ikan/Udang/Cumi)</label>
-          <input type="text" id="jenis-komoditas" placeholder="Misal: Udang Windu / Kakap Merah" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="text-xs font-bold text-slate-700 block mb-1">Total Stok (Kg)</label>
-            <input type="number" id="jumlah-kg" placeholder="150" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-700 block mb-1">Kisaran Harga (Rp/Kg)</label>
-            <input type="number" id="harga-patokan" placeholder="35000" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
-          </div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Jumlah Kg Yang Diambil</label>
+          <input type="number" id="pedagang-ambil-kg" placeholder="Misal: 30" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500" />
         </div>
 
-        <div class="flex gap-3 pt-3">
-          <button type="button" onclick="closePetugasModal()" class="flex-1 py-2.5 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl">Batal</button>
-          <button type="submit" id="btn-submit" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md">Terbitkan Stok</button>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModalAmbil()" class="flex-1 py-2.5 border text-slate-600 text-xs font-bold rounded-xl">Batal</button>
+          <button type="submit" id="btn-submit-ambil" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md">Konfirmasi Potong Stok</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="bg-blue-950 text-blue-200 border-t border-blue-900 py-6 text-center text-xs">
-    <p>© 2026 TPI Manggar Baru Balikpapan • Sistem Informasi Logistik Perikanan</p>
+  <footer class="bg-blue-950 text-blue-200 py-4 text-center text-xs">
+    © 2026 TPI Manggar Baru Balikpapan
   </footer>
 
   <script>
-    // Konfigurasi Supabase Kamu
     const SUPABASE_URL = "https://maspqcdmwnaquptndxfs.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hc3BxY2Rtd25hcXVwdG5keGZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NjU2MzgsImV4cCI6MjEwODI0MTYzOH0.nxlYKmcJCk6KpPhaBBlkvGbCAxdw_XjJBegSjNKeQxU";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const TABLE_NAME = 'tpi-manggar';
 
     let pasokanTPI = [];
+    let activeKategori = 'semua';
 
-    // Ambil Data dari Supabase
+    function switchRole(role) {
+      document.getElementById('sec-publik').classList.add('hidden');
+      document.getElementById('sec-petugas').classList.add('hidden');
+
+      document.getElementById('tab-publik').className = "px-4 py-2 rounded-xl text-blue-200 hover:text-white transition";
+      document.getElementById('tab-petugas').className = "px-4 py-2 rounded-xl text-blue-200 hover:text-white transition";
+
+      if(role === 'publik') {
+        document.getElementById('sec-publik').classList.remove('hidden');
+        document.getElementById('tab-publik').className = "px-4 py-2 rounded-xl bg-orange-500 text-white transition";
+        document.getElementById('role-badge').innerText = "Katalog Stok Real-Time";
+        document.getElementById('role-title').innerText = "Ketersediaan Hasil Tangkapan TPI";
+        document.getElementById('role-desc').innerText = "Cari komoditas perikanan segar, cek sisa stok & harga real-time, lalu hubungi pedagang pemilik barang.";
+      } else if(role === 'petugas') {
+        document.getElementById('sec-petugas').classList.remove('hidden');
+        document.getElementById('tab-petugas').className = "px-4 py-2 rounded-xl bg-orange-500 text-white transition";
+        document.getElementById('role-badge').innerText = "Mode Input Petugas TPI";
+        document.getElementById('role-title').innerText = "Form Timbangan Resmi TPI";
+        document.getElementById('role-desc').innerText = "Input hasil laporan manual nelayan yang baru mendarat di dermaga.";
+      }
+    }
+
     async function loadPasokan() {
-      const { data, error } = await _supabase
-        .from('pasokan_tpi')
-        .select('*')
-        .order('id', { ascending: false });
-
+      const { data, error } = await _supabase.from(TABLE_NAME).select('*').order('id', { ascending: false });
       if (error) {
-        console.error("Gagal mengambil data:", error);
         document.getElementById('pasokan-grid').innerHTML = `<p class="col-span-full text-center py-10 text-red-500 text-sm">Gagal memuat data dari database.</p>`;
         return;
       }
-
       pasokanTPI = data || [];
-      renderPasokan(pasokanTPI);
+      filterPasokan();
+    }
+
+    function formatWA(no) {
+      if(!no) return '6281234567890';
+      let clean = no.replace(/[^0-9]/g, '');
+      if (clean.startsWith('0')) clean = '62' + clean.slice(1);
+      return clean;
     }
 
     function renderPasokan(data) {
       const container = document.getElementById('pasokan-grid');
       container.innerHTML = '';
-
       if (data.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Belum ada data stok pasokan.</p>`;
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Tidak ada stok yang sesuai pencarian/filter.</p>`;
         return;
       }
-
       data.forEach(item => {
         const card = document.createElement('div');
-        card.className = "bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between";
-
-        const tanggal = item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : 'Hari ini';
+        card.className = "bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition";
+        
+        const sisaStok = item.jumlah_kg || 0;
+        const isHabis = sisaStok <= 0;
+        const waNumber = formatWA(item.no_hp);
+        const waText = encodeURIComponent(`Halo ${item.kapal || 'Pedagang'}, saya lihat di Portal TPI stok ${item.komoditas || item.ikan} sisa ${sisaStok} Kg dengan harga Rp ${Number(item.harga_patokan||0).toLocaleString('id-ID')}/Kg. Saya mau tanya/beli.`);
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
-                Dicatat: ${tanggal}
+                Pemilik/Kapal: ${item.kapal || '-'}
               </span>
-              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
-                TPI Verified
+              <span class="text-[10px] font-bold ${isHabis ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'} px-2.5 py-1 rounded-full">
+                ${isHabis ? 'HABIS / SOLD OUT' : 'Verified TPI'}
               </span>
             </div>
-
-            <h4 class="text-xl font-extrabold text-blue-950 mb-1">${item.komoditas || 'Komoditas Laut'}</h4>
-            <p class="text-xs font-semibold text-slate-500 mb-4">
-              Asal Kapal: <span class="text-slate-800">${item.kapal}</span>
-            </p>
-
-            <div class="bg-slate-50 p-4 rounded-2xl mb-5 border border-slate-100 grid grid-cols-2 gap-2">
+            
+            <h4 class="text-lg font-extrabold text-blue-950 mb-3">${item.komoditas || item.ikan || 'Komoditas Perikanan'}</h4>
+            
+            <div class="bg-slate-50 p-3 rounded-2xl mb-4 grid grid-cols-2 gap-2 text-xs border border-slate-100">
               <div>
-                <span class="text-[10px] text-slate-400 font-bold block uppercase">Ketersediaan Stok</span>
-                <span class="text-lg font-black text-blue-900">${item.jumlah_kg} Kg</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase">Stok Real-Time</span>
+                <span class="text-base font-black ${isHabis ? 'text-red-500' : 'text-blue-900'}">${sisaStok} Kg</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 font-bold block uppercase">Kisaran Harga</span>
-                <span class="text-lg font-black text-orange-600">Rp ${Number(item.harga_patokan).toLocaleString('id-ID')}/Kg</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase">Harga Patokan</span>
+                <span class="text-base font-black text-orange-600">Rp ${Number(item.harga_patokan || 0).toLocaleString('id-ID')}/Kg</span>
               </div>
             </div>
           </div>
 
-          <a href="https://wa.me/6281234567890?text=Halo%20Petugas%20TPI,%20saya%20tertarik%20dengan%20stok%20${encodeURIComponent(item.komoditas)}%20(${item.jumlah_kg}%20Kg)%20dari%20${encodeURIComponent(item.kapal)}" 
-             target="_blank" 
-             class="w-full text-center bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl transition shadow-sm block">
-            Tanyakan Stok / Koordinasi Beli
-          </a>
+          <div class="space-y-2">
+            <!-- Tombol 1: Ambil/Potong Stok Langsung di Web -->
+            <button 
+              onclick="openModalAmbil(${item.id}, '${item.komoditas || item.ikan}', ${sisaStok})" 
+              ${isHabis ? 'disabled' : ''} 
+              class="w-full text-center ${isHabis ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 text-white'} text-xs font-bold py-2.5 rounded-xl transition shadow-sm block">
+              ${isHabis ? 'Stok Telah Habis' : '🛍️ Ambil / Beli Stok Ini'}
+            </button>
+
+            <!-- Tombol 2: Kontak WA Pedagang Pemilik -->
+            <a 
+              href="https://wa.me/${waNumber}?text=${waText}" 
+              target="_blank" 
+              class="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-xl transition block shadow-sm">
+              💬 Chat Pedagang (${item.no_hp || 'WA'})
+            </a>
+          </div>
         `;
         container.appendChild(card);
       });
     }
 
+    // FILTER PENCARIAN & KATEGORI
+    function filterKategori(kat) {
+      activeKategori = kat;
+      document.querySelectorAll('.btn-kategori').forEach(btn => {
+        if(btn.dataset.cat === kat) {
+          btn.className = "btn-kategori bg-orange-500 text-white px-3.5 py-2 rounded-xl transition";
+        } else {
+          btn.className = "btn-kategori bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition";
+        }
+      });
+      filterPasokan();
+    }
+
     function filterPasokan() {
       const search = document.getElementById('search-input').value.toLowerCase();
-      const filtered = pasokanTPI.filter(item => 
-        (item.komoditas && item.komoditas.toLowerCase().includes(search)) || 
-        (item.kapal && item.kapal.toLowerCase().includes(search))
-      );
+      
+      const filtered = pasokanTPI.filter(item => {
+        const namaKomoditas = (item.komoditas || item.ikan || '').toLowerCase();
+        const namaKapal = (item.kapal || '').toLowerCase();
+
+        const matchSearch = namaKomoditas.includes(search) || namaKapal.includes(search);
+        const matchKategori = activeKategori === 'semua' || namaKomoditas.includes(activeKategori);
+
+        return matchSearch && matchKategori;
+      });
+
       renderPasokan(filtered);
     }
 
-    function openPetugasModal() { document.getElementById('petugas-modal').classList.remove('hidden'); }
-    function closePetugasModal() { document.getElementById('petugas-modal').classList.add('hidden'); }
+    // MODAL DAN PROSES PENGURANGAN STOK
+    function openModalAmbil(id, komoditas, currentKg) {
+      document.getElementById('modal-item-id').value = id;
+      document.getElementById('modal-current-kg').value = currentKg;
+      document.getElementById('modal-komoditas-title').innerText = komoditas;
+      document.getElementById('modal-sisa-kg').innerText = currentKg;
+      document.getElementById('modal-ambil').classList.remove('hidden');
+    }
 
-    // Simpan Data Baru ke Supabase
-    async function simpanLaporanPetugas(e) {
+    function closeModalAmbil() {
+      document.getElementById('modal-ambil').classList.add('hidden');
+    }
+
+    async function prosesAmbilStok(e) {
       e.preventDefault();
-      const btnSubmit = document.getElementById('btn-submit');
-      btnSubmit.innerText = "Menyimpan...";
-      btnSubmit.disabled = true;
+      const id = document.getElementById('modal-item-id').value;
+      const currentKg = parseInt(document.getElementById('modal-current-kg').value);
+      const ambilKg = parseInt(document.getElementById('pedagang-ambil-kg').value);
+      const namaPedagang = document.getElementById('pedagang-nama').value;
 
-      const kapal = document.getElementById('nama-kapal').value;
-      const komoditas = document.getElementById('jenis-komoditas').value;
-      const jumlah_kg = parseInt(document.getElementById('jumlah-kg').value);
-      const harga_patokan = parseInt(document.getElementById('harga-patokan').value);
+      if (ambilKg > currentKg) {
+        alert(`Jumlah yang diambil (${ambilKg} Kg) melebihi sisa stok (${currentKg} Kg)!`);
+        return;
+      }
 
-      const { data, error } = await _supabase
-        .from('pasokan_tpi')
-        .insert([{ kapal, komoditas, jumlah_kg, harga_patokan }]);
+      if (ambilKg <= 0) {
+        alert("Masukkan jumlah Kg yang valid!");
+        return;
+      }
 
+      const sisaBaru = currentKg - ambilKg;
+
+      document.getElementById('btn-submit-ambil').innerText = "Memproses...";
+      document.getElementById('btn-submit-ambil').disabled = true;
+
+      const { error } = await _supabase
+        .from(TABLE_NAME)
+        .update({ jumlah_kg: sisaBaru })
+        .eq('id', id);
+
+      if (error) {
+        alert("Gagal memperbarui stok: " + error.message);
+      } else {
+        alert(`Berhasil! ${namaPedagang} mengambil ${ambilKg} Kg. Sisa stok di katalog kini: ${sisaBaru} Kg.`);
+        closeModalAmbil();
+        document.querySelector('#modal-ambil form').reset();
+        loadPasokan();
+      }
+
+      document.getElementById('btn-submit-ambil').innerText = "Konfirmasi Potong Stok";
+      document.getElementById('btn-submit-ambil').disabled = false;
+    }
+
+    // INPUT DATA TPI
+    async function simpanDataTPI(e) {
+      e.preventDefault();
+      document.getElementById('btn-tpi').innerText = "Menyimpan...";
+      const kapal = document.getElementById('tpi-kapal').value;
+      const no_hp = document.getElementById('tpi-hp').value;
+      const komoditas = document.getElementById('tpi-komoditas').value;
+      const jumlah_kg = parseInt(document.getElementById('tpi-kg').value);
+      const harga_patokan = parseInt(document.getElementById('tpi-harga').value);
+
+      const { error } = await _supabase.from(TABLE_NAME).insert([{ kapal, no_hp, komoditas, jumlah_kg, harga_patokan }]);
       if (error) {
         alert("Gagal menyimpan data: " + error.message);
       } else {
-        alert("Stok baru berhasil diterbitkan!");
-        document.querySelector('form').reset();
-        closePetugasModal();
-        loadPasokan(); // Refresh data
+        alert("Data timbangan resmi TPI berhasil diterbitkan!");
+        document.querySelector('#sec-petugas form').reset();
+        switchRole('publik');
+        loadPasokan();
       }
-
-      btnSubmit.innerText = "Terbitkan Stok";
-      btnSubmit.disabled = false;
+      document.getElementById('btn-tpi').innerText = "Terbitkan Stok Ke Katalog";
     }
 
-    // Jalankan pertama kali saat halaman dimuat
     loadPasokan();
   </script>
 </body>
