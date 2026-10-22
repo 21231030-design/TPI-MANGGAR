@@ -72,7 +72,7 @@
         </div>
       </section>
 
-      <!-- MODE 2: FORM INPUT PETUGAS TPI (RINGKAS TANPA HP) -->
+      <!-- MODE 2: FORM INPUT PETUGAS TPI -->
       <section id="sec-petugas" class="hidden max-w-xl mx-auto bg-white p-6 rounded-3xl border border-slate-200 shadow-md">
         <h3 class="text-lg font-bold text-blue-950 mb-1">Input Timbangan Resmi TPI</h3>
         <p class="text-xs text-slate-500 mb-4">Catat laporan fisik penimbangan kapal yang baru mendarat di dermaga TPI Manggar Baru.</p>
@@ -149,7 +149,6 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const TABLE_NAME = 'tpi-manggar';
 
-    // NOMOR OFFICIAL WA TPI MANGGAR BARU (Dapat diubah sesuai nomor pengelola)
     const NOMOR_OFFICIAL_TPI = "6281234567890";
 
     let pasokanTPI = [];
@@ -200,7 +199,9 @@
         
         const sisaStok = item.jumlah_kg || 0;
         const isHabis = sisaStok <= 0;
-        const waText = encodeURIComponent(`Halo Pengelola TPI Manggar, saya ingin konfirmasi stok ${item.komoditas || item.ikan} dari ${item.kapal} (sisa ${sisaStok} Kg) dengan patokan harga Rp ${Number(item.harga_patokan||0).toLocaleString('id-ID')}/Kg.`);
+        // MEMBACA DARI KOLOM 'harga' ATAU 'harga_patokan'
+        const hargaNilai = item.harga || item.harga_patokan || 0;
+        const waText = encodeURIComponent(`Halo Pengelola TPI Manggar, saya ingin konfirmasi stok ${item.komoditas || item.ikan} dari ${item.kapal} (sisa ${sisaStok} Kg) dengan patokan harga Rp ${Number(hargaNilai).toLocaleString('id-ID')}/Kg.`);
 
         card.innerHTML = `
           <div>
@@ -222,13 +223,12 @@
               </div>
               <div class="text-right">
                 <span class="text-[10px] text-slate-400 font-bold block uppercase">Harga Patokan</span>
-                <span class="text-base font-black text-orange-600">Rp ${Number(item.harga_patokan || 0).toLocaleString('id-ID')}/Kg</span>
+                <span class="text-base font-black text-orange-600">Rp ${Number(hargaNilai).toLocaleString('id-ID')}/Kg</span>
               </div>
             </div>
           </div>
 
           <div class="space-y-2">
-            <!-- Tombol 1: Potong Stok Langsung di Web -->
             <button 
               onclick="openModalAmbil(${item.id}, '${item.komoditas || item.ikan}', ${sisaStok})" 
               ${isHabis ? 'disabled' : ''} 
@@ -236,7 +236,6 @@
               ${isHabis ? 'Stok Telah Habis' : '🛍️ Ambil / Beli Stok Ini'}
             </button>
 
-            <!-- Tombol 2: Kontak WA Pengelola TPI -->
             <a 
               href="https://wa.me/${NOMOR_OFFICIAL_TPI}?text=${waText}" 
               target="_blank" 
@@ -335,10 +334,10 @@
       const kapal = document.getElementById('tpi-kapal').value;
       const komoditas = document.getElementById('tpi-komoditas').value;
       const jumlah_kg = parseInt(document.getElementById('tpi-kg').value);
-      const harga_patokan = parseInt(document.getElementById('tpi-harga').value);
+      const harga = parseInt(document.getElementById('tpi-harga').value);
 
-      // Simpan langsung tanpa memerlukan no_hp
-      const { error } = await _supabase.from(TABLE_NAME).insert([{ kapal, komoditas, jumlah_kg, harga_patokan }]);
+      // MENGIRIM KATA 'harga' SESUAI NAMA KOLOM DI SUPABASE KAMU
+      const { error } = await _supabase.from(TABLE_NAME).insert([{ kapal, komoditas, jumlah_kg, harga }]);
       if (error) {
         alert("Gagal menyimpan data: " + error.message);
       } else {
