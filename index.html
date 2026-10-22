@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TPI Manggar Baru - Platform Logistik Perikanan</title>
-  <!-- Tailwind CSS CDN -->
+  <title>TPI Manggar Baru - Papan Informasi Pasokan Ikan</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
   <div>
-    <!-- NAVBAR UTAMA (TEMA BIRU NAVY & ACCENT OREN) -->
+    <!-- NAVBAR UTAMA -->
     <nav class="bg-blue-900 border-b-4 border-orange-500 text-white px-6 py-4 sticky top-0 z-40 shadow-md">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -18,289 +17,205 @@
             TPI
           </div>
           <div>
-            <h1 class="text-lg font-bold tracking-wide">TPI Manggar Baru</h1>
-            <p class="text-[11px] text-blue-200">Sistem Logistik & Distribusi Perikanan Balikpapan</p>
+            <h1 class="text-lg font-bold tracking-wide">Papan Informasi TPI Manggar Baru</h1>
+            <p class="text-[11px] text-blue-200">Ketersediaan Stok & Hasil Tangkapan Nelayan</p>
           </div>
         </div>
         
         <div class="flex items-center gap-3">
-          <!-- Status Mode -->
-          <span id="user-status-badge" class="hidden md:inline-block text-xs bg-blue-950 text-blue-200 border border-blue-700 font-semibold px-3 py-1.5 rounded-full">
-            Mode: Konsumen / Publik
-          </span>
-          <!-- Tombol Akses Login -->
+          <!-- Tombol Akses Khusus Petugas Admin TPI -->
           <button 
-            id="auth-btn"
-            onclick="openLoginModal()" 
-            class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition transform active:scale-95"
+            onclick="openPetugasModal()" 
+            class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition"
           >
-            Masuk Peran (Pedagang/B2B)
+            + Input Hasil Timbang (Petugas TPI)
           </button>
         </div>
       </div>
     </nav>
 
-    <!-- BANNER HERO (BREEZE OCEAN BLUE & ORANGE HIGHLIGHT) -->
+    <!-- BANNER RINGKASAN STOK HARIAN -->
     <header class="max-w-7xl mx-auto px-6 pt-6 pb-2">
       <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
-        <!-- Elemen Dekorasi Warna Oren -->
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/20 rounded-full blur-2xl"></div>
         
-        <div class="relative z-10 max-w-2xl">
+        <div class="relative z-10 max-w-3xl">
           <span class="inline-block bg-orange-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-md mb-3 tracking-wider">
-            Transparansi Harga Harian TPI
+            Informasi Resmi TPI Manggar Baru
           </span>
           <h2 class="text-2xl md:text-3xl font-extrabold mb-2 leading-tight">
-            Pantau Pasokan & Perbandingan Harga Ikan Segar
+            Katalog Stok Pasokan Ikan Hari Ini
           </h2>
           <p class="text-blue-100 text-xs md:text-sm leading-relaxed">
-            Akses langsung tanpa login untuk masyarakat & konsumen retail. Bandingkan harga pasokan ikan segar langsung dari pedagang TPI Manggar Baru Balikpapan secara real-time.
+            Daftar ketersediaan volume stok perikatan yang telah diverifikasi dan dicatat oleh petugas dermaga TPI Manggar Baru. Customer skala besar (Resto/Hotel) dapat memantau ketersediaan pasokan secara real-time.
           </p>
         </div>
       </div>
     </header>
 
-    <!-- PENCARIAN & FILTER -->
-    <section class="max-w-7xl mx-auto px-6 my-6">
-      <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm flex flex-col md:flex-row gap-3">
-        <div class="relative flex-1">
+    <!-- KATALOG STOK UTAMA (DILIHAT CUSTOMER/PUBLIK) -->
+    <main class="max-w-7xl mx-auto px-6 my-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-blue-950">Daftar Stok Ikan Siap Angkut</h3>
+          <p class="text-xs text-slate-500">Sesuai laporan penimbangan fisik di dermaga TPI.</p>
+        </div>
+        <div class="w-full md:w-auto">
           <input 
             type="text" 
             id="search-input" 
-            onkeyup="filterProducts()" 
-            placeholder="Cari ikan (misal: Kakap, Cumi, Layang)..." 
-            class="w-full p-3 pl-4 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition"
+            onkeyup="filterPasokan()" 
+            placeholder="Cari jenis ikan / nama kapal..." 
+            class="p-3 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-orange-500 w-full md:w-64"
           />
         </div>
-        <select id="condition-filter" onchange="filterProducts()" class="p-3 rounded-xl border border-slate-200 text-sm outline-none bg-white font-medium text-slate-700 focus:ring-2 focus:ring-orange-500">
-          <option value="all">Semua Kondisi (Segar & Beku)</option>
-          <option value="segar">Segar (TPI Fresh)</option>
-          <option value="beku">Beku (Cold Storage)</option>
-        </select>
-        <!-- Tombol Khusus Pedagang (Tampak Saat Login Pedagang) -->
-        <button id="btn-tambah-produk" onclick="alert('Demo: Buka Form Tambah Stok Pedagang')" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md">
-          + Tambah Stok Lapak
-        </button>
       </div>
-    </section>
 
-    <!-- KATALOG PRODUK UTAMA -->
-    <main class="max-w-7xl mx-auto px-6 mb-12">
-      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <!-- GRID KARTU STOK -->
+      <div id="pasokan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
   </div>
 
-  <!-- MODAL LOGIN DENGAN DEMO PERAN -->
-  <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+  <!-- MODAL INPUT DOCKING / TIMBANGAN (SIMULASI PETUGAS TPI) -->
+  <div id="petugas-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-100">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-blue-950">Masuk Akun Khusus</h3>
-        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        <h3 class="text-xl font-bold text-blue-950">Form Timbangan Petugas TPI</h3>
+        <button onclick="closePetugasModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
       </div>
       
-      <p class="text-xs text-slate-500 mb-4">Pilih atau masukkan akun untuk menguji simulasi fitur khusus pedagang atau mitra B2B.</p>
+      <p class="text-xs text-slate-500 mb-4">Input data hasil laporan penimbangan manual dari kapal nelayan yang mendarat.</p>
 
-      <!-- Pilihan Cepat untuk Demo (Memudahkan Penguji/Dosen) -->
-      <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-5">
-        <p class="text-xs font-bold text-orange-900 mb-2"> Pilihan Akses Cepat (Demo):</p>
+      <form onsubmit="simpanLaporanPetugas(event)" class="space-y-3">
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Nama Kapal / Nelayan Pelapor</label>
+          <input type="text" id="nama-kapal" placeholder="Misal: KM Laut Sahabat (Pak Aris)" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Jenis Ikan Tangkapan</label>
+          <input type="text" id="jenis-ikan" placeholder="Misal: Kakap Merah / Tongkol" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+        </div>
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="autoFillLogin('pedagang', '123')" class="bg-white hover:bg-orange-100 border border-orange-300 text-orange-900 text-xs font-semibold py-2 px-3 rounded-xl transition">
-             Akun Pedagang
-          </button>
-          <button onclick="autoFillLogin('b2b', '123')" class="bg-white hover:bg-orange-100 border border-orange-300 text-orange-900 text-xs font-semibold py-2 px-3 rounded-xl transition">
-             Akun Mitra B2B
-          </button>
+          <div>
+            <label class="text-xs font-bold text-slate-700 block mb-1">Total Stok (Kg)</label>
+            <input type="number" id="jumlah-kg" placeholder="150" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-700 block mb-1">Kisaran Harga (Rp/Kg)</label>
+            <input type="number" id="harga-patokan" placeholder="35000" required class="w-full p-2.5 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
         </div>
-      </div>
 
-      <form onsubmit="handleLogin(event)" class="space-y-4">
-        <div>
-          <label class="text-xs font-bold text-slate-700 block mb-1">Username</label>
-          <input type="text" id="login-username" placeholder="Masukkan username" required class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600" />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-700 block mb-1">Password</label>
-          <input type="password" id="login-password" placeholder="Masukkan password" required class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600" />
-        </div>
-        
-        <p id="login-error" class="text-xs text-rose-600 font-bold hidden">Username atau password salah!</p>
-
-        <div class="flex gap-3 pt-2">
-          <button type="button" onclick="closeLoginModal()" class="flex-1 py-3 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-50 transition">
-            Batal
-          </button>
-          <button type="submit" class="flex-1 py-3 bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold rounded-xl shadow-md transition">
-            Masuk Sistem
-          </button>
+        <div class="flex gap-3 pt-3">
+          <button type="button" onclick="closePetugasModal()" class="flex-1 py-2.5 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md">Terbitkan Stok</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- FOOTER TEMA NAVY -->
+  <!-- FOOTER -->
   <footer class="bg-blue-950 text-blue-200 border-t border-blue-900 py-6 text-center text-xs">
-    <p>© 2026 TPI Manggar Baru Balikpapan • Perancangan Sistem Logistik Perikanan</p>
+    <p>© 2026 TPI Manggar Baru Balikpapan • Sistem Informasi Logistik Perikanan</p>
   </footer>
 
   <script>
-    // Data Dummy Produk Pasokan TPI
-    let products = [
-      { id: 1, name: "Kakap Merah", seller: "Lapak Pak Ramli (A-02)", price: 35000, stock: 45, condition: "segar", phone: "6281234567890" },
-      { id: 2, name: "Kakap Merah", seller: "Lapak H. Usman (B-05)", price: 33500, stock: 60, condition: "segar", phone: "6281298765432" },
-      { id: 3, name: "Cumi-Cumi Segar", seller: "Lapak Bu Ani (A-08)", price: 49000, stock: 25, condition: "segar", phone: "6281345678901" },
-      { id: 4, name: "Layang Benggol", seller: "Lapak H. Usman (B-05)", price: 27000, stock: 120, condition: "segar", phone: "6281298765432" },
-      { id: 5, name: "Udang Windu", seller: "Lapak Bu Ani (A-08)", price: 165000, stock: 15, condition: "segar", phone: "6281345678901" },
-      { id: 6, name: "Ikan Bandeng", seller: "Lapak Pak Mansyur (C-01)", price: 20000, stock: 80, condition: "segar", phone: "6281456789012" }
+    // Data Dummy Awal Pasokan Hasil Timbang Dermaga TPI
+    let pasokanTPI = [
+      { id: 1, kapal: "KM Sinar Laut (Pak Mansyur)", ikan: "Kakap Merah", jumlahKg: 120, hargaPatokan: 35000, jamCatat: "05:30 WITA", kontakTPI: "6281234567890" },
+      { id: 2, kapal: "KM Bahari Manggar (Pak Burhan)", ikan: "Tongkol Komando", jumlahKg: 250, hargaPatokan: 22000, jamCatat: "06:15 WITA", kontakTPI: "6281234567890" },
+      { id: 3, kapal: "KM Nelayan Perkasa (Pak Herman)", ikan: "Cumi-Cumi Jarum", jumlahKg: 75, hargaPatokan: 48000, jamCatat: "06:45 WITA", kontakTPI: "6281234567890" },
+      { id: 4, kapal: "KM Laut Sahabat (Pak Aris)", ikan: "Ikan Layang", jumlahKg: 300, hargaPatokan: 18000, jamCatat: "07:10 WITA", kontakTPI: "6281234567890" }
     ];
 
-    let currentUserRole = 'publik';
-
-    function renderProducts(dataToRender) {
-      const container = document.getElementById('product-grid');
+    function renderPasokan(data) {
+      const container = document.getElementById('pasokan-grid');
       container.innerHTML = '';
 
-      if (dataToRender.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Jenis ikan tidak ditemukan.</p>`;
+      if (data.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Tidak ada stok pasokan yang sesuai pencarian.</p>`;
         return;
       }
 
-      dataToRender.forEach(item => {
+      data.forEach(item => {
         const card = document.createElement('div');
         card.className = "bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between";
 
-        let actionHtml = '';
-        if (currentUserRole === 'publik') {
-          actionHtml = `
-            <a href="https://wa.me/${item.phone}?text=Halo%20${encodeURIComponent(item.seller)},%20saya%20ingin%20tanya%20stok%20${encodeURIComponent(item.name)}" 
-               target="_blank" 
-               class="w-full block text-center bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
-              Hubungi Pedagang (WhatsApp)
-            </a>`;
-        } else if (currentUserRole === 'pedagang') {
-          actionHtml = `
-            <button onclick="alert('Demo: Edit harga/stok ${item.name}')" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
-              Kelora Harga & Stok Lapak
-            </button>`;
-        } else if (currentUserRole === 'b2b') {
-          actionHtml = `
-            <button onclick="alert('Demo: Buat Kontrak Repeat Order untuk ${item.name}')" class="w-full bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
-              + Buat Kontrak Repeat Order (B2B)
-            </button>`;
-        }
-
         card.innerHTML = `
           <div>
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-lg font-bold text-blue-950">${item.name}</h3>
-              <span class="px-3 py-1 ${item.condition === 'segar' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-blue-100 text-blue-700 border border-blue-200'} text-[10px] font-extrabold uppercase rounded-full">
-                ${item.condition}
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
+                Mendarat: ${item.jamCatat}
+              </span>
+              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
+                TPI Verified
               </span>
             </div>
-            
-            <p class="text-xs text-slate-500 mb-4">
-              Pedagang: <span class="font-bold text-slate-700">${item.seller}</span>
+
+            <h4 class="text-xl font-extrabold text-blue-950 mb-1">${item.ikan}</h4>
+            <p class="text-xs font-semibold text-slate-500 mb-4">
+              Asal Kapal: <span class="text-slate-800">${item.kapal}</span>
             </p>
 
-            <div class="bg-slate-50 p-4 rounded-2xl mb-5 flex justify-between items-center border border-slate-100">
+            <div class="bg-slate-50 p-4 rounded-2xl mb-5 border border-slate-100 grid grid-cols-2 gap-2">
               <div>
-                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Harga / Kg</span>
-                <span class="text-xl font-black text-orange-600">Rp ${item.price.toLocaleString('id-ID')}</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase">Ketersediaan Stok</span>
+                <span class="text-lg font-black text-blue-900">${item.jumlahKg} Kg</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Stok</span>
-                <span class="text-xs font-bold text-slate-700">${item.stock} kg</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase">Kisaran Harga</span>
+                <span class="text-lg font-black text-orange-600">Rp ${item.hargaPatokan.toLocaleString('id-ID')}/Kg</span>
               </div>
             </div>
           </div>
 
-          <div>${actionHtml}</div>
+          <a href="https://wa.me/${item.kontakTPI}?text=Halo%20Petugas%20TPI,%20saya%20tertarik%20dengan%20stok%20${encodeURIComponent(item.ikan)}%20(${item.jumlahKg}%20Kg)%20dari%20${encodeURIComponent(item.kapal)}" 
+             target="_blank" 
+             class="w-full text-center bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl transition shadow-sm block">
+            Tanyakan Stok / Koordinasi Beli
+          </a>
         `;
         container.appendChild(card);
       });
     }
 
-    function filterProducts() {
-      const searchValue = document.getElementById('search-input').value.toLowerCase();
-      const conditionValue = document.getElementById('condition-filter').value;
+    function filterPasokan() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const filtered = pasokanTPI.filter(item => 
+        item.ikan.toLowerCase().includes(search) || item.kapal.toLowerCase().includes(search)
+      );
+      renderPasokan(filtered);
+    }
 
-      const filtered = products.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(searchValue) || item.seller.toLowerCase().includes(searchValue);
-        const matchesCondition = conditionValue === 'all' || item.condition === conditionValue;
-        return matchesSearch && matchesCondition;
+    function openPetugasModal() { document.getElementById('petugas-modal').classList.remove('hidden'); }
+    function closePetugasModal() { document.getElementById('petugas-modal').classList.add('hidden'); }
+
+    function simpanLaporanPetugas(e) {
+      e.preventDefault();
+      const kapal = document.getElementById('nama-kapal').value;
+      const ikan = document.getElementById('jenis-ikan').value;
+      const kg = parseInt(document.getElementById('jumlah-kg').value);
+      const harga = parseInt(document.getElementById('harga-patokan').value);
+
+      const jamSekarang = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WITA";
+
+      pasokanTPI.unshift({
+        id: Date.now(),
+        kapal: kapal,
+        ikan: ikan,
+        jumlahKg: kg,
+        hargaPatokan: harga,
+        jamCatat: jamSekarang,
+        kontakTPI: "6281234567890"
       });
 
-      renderProducts(filtered);
+      closePetugasModal();
+      filterPasokan();
+      alert(`Stok baru berhasil diterbitkan oleh Petugas TPI!`);
     }
 
-    // AUTH / LOGIN LOGIC
-    function openLoginModal() {
-      if (currentUserRole !== 'publik') {
-        currentUserRole = 'publik';
-        updateUI();
-        alert('Anda telah keluar dari mode khusus.');
-        return;
-      }
-      document.getElementById('login-modal').classList.remove('hidden');
-    }
-
-    function closeLoginModal() {
-      document.getElementById('login-modal').classList.add('hidden');
-      document.getElementById('login-error').classList.add('hidden');
-    }
-
-    function autoFillLogin(user, pass) {
-      document.getElementById('login-username').value = user;
-      document.getElementById('login-password').value = pass;
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const user = document.getElementById('login-username').value.trim();
-      const pass = document.getElementById('login-password').value.trim();
-
-      if (user === 'pedagang' && pass === '123') {
-        currentUserRole = 'pedagang';
-        closeLoginModal();
-        updateUI();
-      } else if (user === 'b2b' && pass === '123') {
-        currentUserRole = 'b2b';
-        closeLoginModal();
-        updateUI();
-      } else {
-        document.getElementById('login-error').classList.remove('hidden');
-      }
-    }
-
-    function updateUI() {
-      const badge = document.getElementById('user-status-badge');
-      const authBtn = document.getElementById('auth-btn');
-      const btnTambah = document.getElementById('btn-tambah-produk');
-
-      if (currentUserRole === 'publik') {
-        badge.innerText = "Mode: Konsumen / Publik";
-        badge.className = "hidden md:inline-block text-xs bg-blue-950 text-blue-200 border border-blue-700 font-semibold px-3 py-1.5 rounded-full";
-        authBtn.innerText = "Masuk Peran (Pedagang/B2B)";
-        authBtn.className = "bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
-        btnTambah.classList.add('hidden');
-      } else if (currentUserRole === 'pedagang') {
-        badge.innerText = "Mode Logged-in: Pedagang TPI";
-        badge.className = "hidden md:inline-block text-xs bg-orange-500 text-white font-bold px-3 py-1.5 rounded-full";
-        authBtn.innerText = "Keluar (Logout)";
-        authBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
-        btnTambah.classList.remove('hidden');
-      } else if (currentUserRole === 'b2b') {
-        badge.innerText = "Mode Logged-in: Mitra B2B";
-        badge.className = "hidden md:inline-block text-xs bg-blue-700 text-white font-bold px-3 py-1.5 rounded-full";
-        authBtn.innerText = "Keluar (Logout)";
-        authBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
-        btnTambah.classList.add('hidden');
-      }
-
-      filterProducts();
-    }
-
-    // Inisialisasi Pertama Kali
-    renderProducts(products);
+    // Inisialisasi awal
+    renderPasokan(pasokanTPI);
   </script>
 </body>
 </html>
