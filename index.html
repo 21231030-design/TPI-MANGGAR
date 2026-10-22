@@ -3,193 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistem Informasi Distribusi TPI Manggar Baru</title>
-  <!-- Tailwind CSS CDN untuk Tampilan Modern & Responsif -->
+  <title>TPI Manggar Baru - Platform Logistik Perikanan</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col justify-between">
 
   <div>
-    <!-- NAVBAR UTAMA (PUBLIK) -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h1 class="text-xl font-bold text-blue-900">TPI Manggar Baru Logistik</h1>
-          <p class="text-xs text-slate-500">Sistem Informasi Distribusi Produk Perikanan Terintegrasi Balikpapan</p>
+    <!-- NAVBAR UTAMA (TEMA BIRU NAVY & ACCENT OREN) -->
+    <nav class="bg-blue-900 border-b-4 border-orange-500 text-white px-6 py-4 sticky top-0 z-40 shadow-md">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="bg-orange-500 text-white font-black p-2 rounded-xl text-lg shadow-sm">
+            TPI
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-wide">TPI Manggar Baru</h1>
+            <p class="text-[11px] text-blue-200">Sistem Logistik & Distribusi Perikanan Balikpapan</p>
+          </div>
         </div>
         
         <div class="flex items-center gap-3">
-          <span id="role-badge" class="text-xs bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full">
-            Mode: Publik (Tanpa Login)
+          <!-- Status Mode -->
+          <span id="user-status-badge" class="hidden md:inline-block text-xs bg-blue-950 text-blue-200 border border-blue-700 font-semibold px-3 py-1.5 rounded-full">
+            Mode: Konsumen / Publik
           </span>
+          <!-- Tombol Akses Login -->
           <button 
-            onclick="toggleRoleModal()" 
-            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm transition"
+            id="auth-btn"
+            onclick="openLoginModal()" 
+            class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition transform active:scale-95"
           >
-            Akses Lapak Pedagang / B2B
+            Masuk Peran (Pedagang/B2B)
           </button>
         </div>
       </div>
     </nav>
 
-    <!-- HEADER INFORMASI -->
-    <header class="max-w-7xl mx-auto px-6 pt-8 pb-4">
-      <div class="bg-gradient-to-r from-blue-900 to-indigo-800 rounded-2xl p-6 text-white shadow-md">
-        <h2 class="text-2xl font-bold mb-2">Katalog Pasokan & Perbandingan Harga Real-Time</h2>
-        <p class="text-blue-100 text-sm max-w-2xl">
-          Akses informasi ketersediaan ikan segar & beku langsung dari pedagang TPI Manggar Baru. Bandingkan harga dari beberapa pedagang sebelum berkunjung atau lakukan pemesanan rutin untuk kebutuhan usaha.
-        </p>
+    <!-- BANNER HERO (BREEZE OCEAN BLUE & ORANGE HIGHLIGHT) -->
+    <header class="max-w-7xl mx-auto px-6 pt-6 pb-2">
+      <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+        <!-- Elemen Dekorasi Warna Oren -->
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/20 rounded-full blur-2xl"></div>
+        
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-block bg-orange-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-md mb-3 tracking-wider">
+            Transparansi Harga Harian TPI
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 leading-tight">
+            Pantau Pasokan & Perbandingan Harga Ikan Segar
+          </h2>
+          <p class="text-blue-100 text-xs md:text-sm leading-relaxed">
+            Akses langsung tanpa login untuk masyarakat & konsumen retail. Bandingkan harga pasokan ikan segar langsung dari pedagang TPI Manggar Baru Balikpapan secara real-time.
+          </p>
+        </div>
       </div>
     </header>
 
-    <!-- PANEL PENCARIAN & FILTER KOMPARASI -->
-    <section class="max-w-7xl mx-auto px-6 mb-6">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
-        <input 
-          type="text" 
-          id="search-input" 
-          onkeyup="filterProducts()" 
-          placeholder="Cari jenis ikan (misal: Kakap, Cumi, Layang, Udang)..." 
-          class="flex-1 p-3 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-        />
-        <select id="condition-filter" onchange="filterProducts()" class="p-3 rounded-lg border border-slate-300 text-sm outline-none bg-white">
+    <!-- PENCARIAN & FILTER -->
+    <section class="max-w-7xl mx-auto px-6 my-6">
+      <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm flex flex-col md:flex-row gap-3">
+        <div class="relative flex-1">
+          <input 
+            type="text" 
+            id="search-input" 
+            onkeyup="filterProducts()" 
+            placeholder="Cari ikan (misal: Kakap, Cumi, Layang)..." 
+            class="w-full p-3 pl-4 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition"
+          />
+        </div>
+        <select id="condition-filter" onchange="filterProducts()" class="p-3 rounded-xl border border-slate-200 text-sm outline-none bg-white font-medium text-slate-700 focus:ring-2 focus:ring-orange-500">
           <option value="all">Semua Kondisi (Segar & Beku)</option>
-          <option value="segar">Segar</option>
-          <option value="beku">Beku</option>
+          <option value="segar">Segar (TPI Fresh)</option>
+          <option value="beku">Beku (Cold Storage)</option>
         </select>
+        <!-- Tombol Khusus Pedagang (Tampak Saat Login Pedagang) -->
+        <button id="btn-tambah-produk" onclick="alert('Demo: Buka Form Tambah Stok Pedagang')" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md">
+          + Tambah Stok Lapak
+        </button>
       </div>
     </section>
 
-    <!-- CONTAINER DAFTAR PRODUK & PERBANDINGAN HARGA -->
+    <!-- KATALOG PRODUK UTAMA -->
     <main class="max-w-7xl mx-auto px-6 mb-12">
-      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Kartu Produk akan di-render otomatis melalui JavaScript -->
-      </div>
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
   </div>
 
-  <!-- MODAL PILIH AKSES PERAN (PEDAGANG & B2B REPEAT ORDER) -->
-  <div id="role-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
-      <h3 class="text-lg font-bold text-slate-800 mb-1">Simulasi Peran Pengguna</h3>
-      <p class="text-xs text-slate-500 mb-6">
-        Pilih mode akses untuk mendemonstrasikan fitur khusus pedagang atau fitur repeat order untuk hotel/restoran tanpa perlu login.
-      </p>
+  <!-- MODAL LOGIN DENGAN DEMO PERAN -->
+  <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-blue-950">Masuk Akun Khusus</h3>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+      </div>
+      
+      <p class="text-xs text-slate-500 mb-4">Pilih atau masukkan akun untuk menguji simulasi fitur khusus pedagang atau mitra B2B.</p>
 
-      <div class="space-y-3">
-        <button onclick="setRole('publik')" class="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition">
-          <p class="font-bold text-slate-800 text-sm">1. Mode Publik / Konsumen Retail</p>
-          <p class="text-xs text-slate-500">Melihat katalog pasokan, ketersediaan stok, dan membandingkan harga.</p>
-        </button>
-
-        <button onclick="setRole('pedagang')" class="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition">
-          <p class="font-bold text-slate-800 text-sm">2. Mode Lapak Pedagang TPI</p>
-          <p class="text-xs text-slate-500">Fitur update harga harian, ubah status stok (Tersedia/Habis), dan kelola barang.</p>
-        </button>
-
-        <button onclick="setRole('b2b')" class="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition">
-          <p class="font-bold text-slate-800 text-sm">3. Mode Mitra B2B (Hotel / Restoran)</p>
-          <p class="text-xs text-slate-500">Fitur kontrak pasokan rutin (Repeat Order) dan pengajuan Purchase Order (PO).</p>
-        </button>
+      <!-- Pilihan Cepat untuk Demo (Memudahkan Penguji/Dosen) -->
+      <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-5">
+        <p class="text-xs font-bold text-orange-900 mb-2"> Pilihan Akses Cepat (Demo):</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="autoFillLogin('pedagang', '123')" class="bg-white hover:bg-orange-100 border border-orange-300 text-orange-900 text-xs font-semibold py-2 px-3 rounded-xl transition">
+             Akun Pedagang
+          </button>
+          <button onclick="autoFillLogin('b2b', '123')" class="bg-white hover:bg-orange-100 border border-orange-300 text-orange-900 text-xs font-semibold py-2 px-3 rounded-xl transition">
+             Akun Mitra B2B
+          </button>
+        </div>
       </div>
 
-      <button onclick="toggleRoleModal()" class="mt-6 w-full text-center text-xs text-slate-400 hover:text-slate-700">
-        Batal / Tutup
-      </button>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Username</label>
+          <input type="text" id="login-username" placeholder="Masukkan username" required class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1">Password</label>
+          <input type="password" id="login-password" placeholder="Masukkan password" required class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600" />
+        </div>
+        
+        <p id="login-error" class="text-xs text-rose-600 font-bold hidden">Username atau password salah!</p>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeLoginModal()" class="flex-1 py-3 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-50 transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-3 bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold rounded-xl shadow-md transition">
+            Masuk Sistem
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-    <p>© 2026 TPI Manggar Baru Balikpapan - Perancangan Sistem Logistik Terintegrasi Capstone</p>
+  <!-- FOOTER TEMA NAVY -->
+  <footer class="bg-blue-950 text-blue-200 border-t border-blue-900 py-6 text-center text-xs">
+    <p>© 2026 TPI Manggar Baru Balikpapan • Perancangan Sistem Logistik Perikanan</p>
   </footer>
 
-  <!-- SCRIPT LOGIKA SIMULASI TERINTEGRASI -->
   <script>
-    // Data Dummy Awal Produk Berdasarkan Pasokan Real TPI Manggar
+    // Data Dummy Produk Pasokan TPI
     let products = [
       { id: 1, name: "Kakap Merah", seller: "Lapak Pak Ramli (A-02)", price: 35000, stock: 45, condition: "segar", phone: "6281234567890" },
       { id: 2, name: "Kakap Merah", seller: "Lapak H. Usman (B-05)", price: 33500, stock: 60, condition: "segar", phone: "6281298765432" },
-      { id: 3, name: "Cumi-Cumi", seller: "Lapak Bu Ani (A-08)", price: 49000, stock: 25, condition: "segar", phone: "6281345678901" },
-      { id: 4, name: "Cumi-Cumi", seller: "Lapak Pak Ramli (A-02)", price: 51000, stock: 30, condition: "segar", phone: "6281234567890" },
-      { id: 5, name: "Layang Benggol", seller: "Lapak H. Usman (B-05)", price: 27000, stock: 120, condition: "segar", phone: "6281298765432" },
-      { id: 6, name: "Udang Windu", seller: "Lapak Bu Ani (A-08)", price: 165000, stock: 15, condition: "segar", phone: "6281345678901" },
-      { id: 7, name: "Bandeng", seller: "Lapak Pak Mansyur (C-01)", price: 20000, stock: 80, condition: "segar", phone: "6281456789012" },
-      { id: 8, name: "Selar Bentong", seller: "Lapak Pak Mansyur (C-01)", price: 22000, stock: 40, condition: "beku", phone: "6281456789012" }
+      { id: 3, name: "Cumi-Cumi Segar", seller: "Lapak Bu Ani (A-08)", price: 49000, stock: 25, condition: "segar", phone: "6281345678901" },
+      { id: 4, name: "Layang Benggol", seller: "Lapak H. Usman (B-05)", price: 27000, stock: 120, condition: "segar", phone: "6281298765432" },
+      { id: 5, name: "Udang Windu", seller: "Lapak Bu Ani (A-08)", price: 165000, stock: 15, condition: "segar", phone: "6281345678901" },
+      { id: 6, name: "Ikan Bandeng", seller: "Lapak Pak Mansyur (C-01)", price: 20000, stock: 80, condition: "segar", phone: "6281456789012" }
     ];
 
-    let currentRole = 'publik';
+    let currentUserRole = 'publik';
 
     function renderProducts(dataToRender) {
       const container = document.getElementById('product-grid');
       container.innerHTML = '';
 
       if (dataToRender.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400">Tidak ada produk perikanan yang sesuai dengan pencarian.</p>`;
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 text-sm">Jenis ikan tidak ditemukan.</p>`;
         return;
       }
 
       dataToRender.forEach(item => {
         const card = document.createElement('div');
-        card.className = "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between";
+        card.className = "bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between";
 
-        let actionButtonHtml = '';
-
-        if (currentRole === 'publik') {
-          actionButtonHtml = `
+        let actionHtml = '';
+        if (currentUserRole === 'publik') {
+          actionHtml = `
             <a href="https://wa.me/${item.phone}?text=Halo%20${encodeURIComponent(item.seller)},%20saya%20ingin%20tanya%20stok%20${encodeURIComponent(item.name)}" 
                target="_blank" 
-               class="w-full block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-3 rounded-xl transition">
-              Hubungi / Pesan Langsung
-            </a>
-          `;
-        } else if (currentRole === 'pedagang') {
-          actionButtonHtml = `
-            <div class="flex gap-2">
-              <button onclick="updatePrice(${item.id})" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2.5 rounded-xl transition">
-                Update Harga
-              </button>
-              <button onclick="toggleStock(${item.id})" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold py-2.5 rounded-xl transition">
-                Update Stok
-              </button>
-            </div>
-          `;
-        } else if (currentRole === 'b2b') {
-          actionButtonHtml = `
-            <button onclick="createRepeatOrder('${item.name}', '${item.seller}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-3 rounded-xl shadow-sm transition">
-              + Buat Kontrak Repeat Order
-            </button>
-          `;
+               class="w-full block text-center bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
+              Hubungi Pedagang (WhatsApp)
+            </a>`;
+        } else if (currentUserRole === 'pedagang') {
+          actionHtml = `
+            <button onclick="alert('Demo: Edit harga/stok ${item.name}')" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
+              Kelora Harga & Stok Lapak
+            </button>`;
+        } else if (currentUserRole === 'b2b') {
+          actionHtml = `
+            <button onclick="alert('Demo: Buat Kontrak Repeat Order untuk ${item.name}')" class="w-full bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold py-3 rounded-2xl shadow-sm transition">
+              + Buat Kontrak Repeat Order (B2B)
+            </button>`;
         }
 
         card.innerHTML = `
           <div>
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-bold text-slate-800">${item.name}</h3>
-              <span class="px-2.5 py-1 ${item.condition === 'segar' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'} text-[10px] font-bold uppercase tracking-wider rounded-md">
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="text-lg font-bold text-blue-950">${item.name}</h3>
+              <span class="px-3 py-1 ${item.condition === 'segar' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-blue-100 text-blue-700 border border-blue-200'} text-[10px] font-extrabold uppercase rounded-full">
                 ${item.condition}
               </span>
             </div>
             
             <p class="text-xs text-slate-500 mb-4">
-              Pedagang: <span class="font-medium text-slate-700">${item.seller}</span>
+              Pedagang: <span class="font-bold text-slate-700">${item.seller}</span>
             </p>
 
-            <div class="bg-slate-50 p-3 rounded-xl mb-4 flex justify-between items-center">
+            <div class="bg-slate-50 p-4 rounded-2xl mb-5 flex justify-between items-center border border-slate-100">
               <div>
-                <span class="text-[10px] text-slate-400 block uppercase">Harga per Kg</span>
-                <span class="text-xl font-extrabold text-blue-900">Rp ${item.price.toLocaleString('id-ID')}</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Harga / Kg</span>
+                <span class="text-xl font-black text-orange-600">Rp ${item.price.toLocaleString('id-ID')}</span>
               </div>
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 block uppercase">Stok Tersedia</span>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Stok</span>
                 <span class="text-xs font-bold text-slate-700">${item.stock} kg</span>
               </div>
             </div>
           </div>
 
-          <div>${actionButtonHtml}</div>
+          <div>${actionHtml}</div>
         `;
-
         container.appendChild(card);
       });
     }
@@ -207,55 +232,74 @@
       renderProducts(filtered);
     }
 
-    function toggleRoleModal() {
-      const modal = document.getElementById('role-modal');
-      modal.classList.toggle('hidden');
+    // AUTH / LOGIN LOGIC
+    function openLoginModal() {
+      if (currentUserRole !== 'publik') {
+        currentUserRole = 'publik';
+        updateUI();
+        alert('Anda telah keluar dari mode khusus.');
+        return;
+      }
+      document.getElementById('login-modal').classList.remove('hidden');
     }
 
-    function setRole(role) {
-      currentRole = role;
-      const badge = document.getElementById('role-badge');
-      
-      if (role === 'publik') badge.innerText = "Mode: Publik (Tanpa Login)";
-      if (role === 'pedagang') badge.innerText = "Mode: Lapak Pedagang TPI";
-      if (role === 'b2b') badge.innerText = "Mode: Mitra B2B (Hotel/Resto)";
+    function closeLoginModal() {
+      document.getElementById('login-modal').classList.add('hidden');
+      document.getElementById('login-error').classList.add('hidden');
+    }
 
-      toggleRoleModal();
+    function autoFillLogin(user, pass) {
+      document.getElementById('login-username').value = user;
+      document.getElementById('login-password').value = pass;
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('login-username').value.trim();
+      const pass = document.getElementById('login-password').value.trim();
+
+      if (user === 'pedagang' && pass === '123') {
+        currentUserRole = 'pedagang';
+        closeLoginModal();
+        updateUI();
+      } else if (user === 'b2b' && pass === '123') {
+        currentUserRole = 'b2b';
+        closeLoginModal();
+        updateUI();
+      } else {
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+    }
+
+    function updateUI() {
+      const badge = document.getElementById('user-status-badge');
+      const authBtn = document.getElementById('auth-btn');
+      const btnTambah = document.getElementById('btn-tambah-produk');
+
+      if (currentUserRole === 'publik') {
+        badge.innerText = "Mode: Konsumen / Publik";
+        badge.className = "hidden md:inline-block text-xs bg-blue-950 text-blue-200 border border-blue-700 font-semibold px-3 py-1.5 rounded-full";
+        authBtn.innerText = "Masuk Peran (Pedagang/B2B)";
+        authBtn.className = "bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
+        btnTambah.classList.add('hidden');
+      } else if (currentUserRole === 'pedagang') {
+        badge.innerText = "Mode Logged-in: Pedagang TPI";
+        badge.className = "hidden md:inline-block text-xs bg-orange-500 text-white font-bold px-3 py-1.5 rounded-full";
+        authBtn.innerText = "Keluar (Logout)";
+        authBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
+        btnTambah.classList.remove('hidden');
+      } else if (currentUserRole === 'b2b') {
+        badge.innerText = "Mode Logged-in: Mitra B2B";
+        badge.className = "hidden md:inline-block text-xs bg-blue-700 text-white font-bold px-3 py-1.5 rounded-full";
+        authBtn.innerText = "Keluar (Logout)";
+        authBtn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition";
+        btnTambah.classList.add('hidden');
+      }
+
       filterProducts();
     }
 
-    function updatePrice(id) {
-      const newPrice = prompt("Masukkan harga per kg yang baru (Rp):");
-      if (newPrice && !isNaN(newPrice)) {
-        const product = products.find(p => p.id === id);
-        if (product) {
-          product.price = parseInt(newPrice);
-          alert(`Harga ${product.name} di ${product.seller} berhasil diubah menjadi Rp ${product.price.toLocaleString('id-ID')}`);
-          filterProducts();
-        }
-      }
-    }
-
-    function toggleStock(id) {
-      const newStock = prompt("Masukkan jumlah stok baru (kg):");
-      if (newStock && !isNaN(newStock)) {
-        const product = products.find(p => p.id === id);
-        if (product) {
-          product.stock = parseInt(newStock);
-          alert(`Stok ${product.name} berhasil diperbarui menjadi ${product.stock} kg.`);
-          filterProducts();
-        }
-      }
-    }
-
-    function createRepeatOrder(fishName, seller) {
-      const qty = prompt(`[Hotel/Restoran] Masukkan jumlah pasokan rutin ${fishName} yang dibutuhkan (kg per pengiriman):`, "20");
-      if (qty) {
-        alert(`Berhasil mengajukan Kontrak Repeat Order!\n\nProduk: ${fishName}\nPedagang: ${seller}\nVolume Rutin: ${qty} kg / pengiriman\n\nJadwal pesanan otomatis tersimpan di sistem logistik.`);
-      }
-    }
-
-    // Render awal saat halaman dimuat
+    // Inisialisasi Pertama Kali
     renderProducts(products);
   </script>
 </body>
